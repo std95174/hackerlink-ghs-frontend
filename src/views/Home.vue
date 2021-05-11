@@ -1,6 +1,7 @@
 <template>
   <div>
     <div>Your handsome account: {{ currentAccount }}</div>
+    <v-btn @click="sendETH">Send 1 ETH to Frank</v-btn>
     <hello-world />
   </div>
 </template>
@@ -59,6 +60,19 @@ export default {
             console.error(err);
           }
         });
+    },
+    sendETH() {
+      const vm = this;
+      ethereum.request({
+        method: "eth_sendTransaction",
+        params: [
+          {
+            from: vm.currentAccount,
+            to: vm.currentAccount,
+            value: "0xDE0B6B3A7640000"
+          }
+        ]
+      });
     }
   },
   async mounted() {
