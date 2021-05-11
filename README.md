@@ -1,5 +1,9 @@
 # hackerlink-ghs
 
+## Description
+
+Front-end of Pinture: Vue + Metamask
+
 ## Project setup
 ```
 yarn install
