@@ -1,8 +1,7 @@
 <template>
-  <div class="home">
+  <div>
     <div>Your handsome account: {{ currentAccount }}</div>
-    <img alt="Vue logo" src="../assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js App" />
+    <hello-world />
   </div>
 </template>
 
@@ -10,7 +9,6 @@
 // @ is an alias to /src
 import detectEthereumProvider from "@metamask/detect-provider";
 import HelloWorld from "@/components/HelloWorld.vue";
-
 export default {
   name: "Home",
   components: {
@@ -75,17 +73,13 @@ export default {
     /**********************************************************/
     /* Handle chain (network) and chainChanged (per EIP-1193) */
     /**********************************************************/
-
     const chainId = await ethereum.request({ method: "eth_chainId" });
     console.log(chainId);
     // this.handleChainChanged(chainId);
-
     ethereum.on("chainChanged", this.handleChainChanged);
-
     /***********************************************************/
     /* Handle user accounts and accountsChanged (per EIP-1193) */
     /***********************************************************/
-
     ethereum
       .request({ method: "eth_requestAccounts" })
       .then(this.handleAccountsChanged)
@@ -95,16 +89,13 @@ export default {
         // eth_accounts will return an empty array.
         console.error(err);
       });
-
     // Note that this event is emitted on page load.
     // If the array of accounts is non-empty, you're already
     // connected.
     ethereum.on("accountsChanged", this.handleAccountsChanged);
-
     /*********************************************/
     /* Access the user's accounts (per EIP-1102) */
     /*********************************************/
-
     // You should only attempt to request the user's accounts in response to user
     // interaction, such as a button click.
     // Otherwise, you popup-spam the user like it's 1999.
