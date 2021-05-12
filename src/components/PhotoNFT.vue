@@ -23,15 +23,31 @@
               <v-stepper-content step="1">
                 <v-card class="mb-12" color=" lighten-1" height="200px">
                   <v-card-title>Upload Your Photo to IPFS</v-card-title>
+                  <v-card-text>
+                    <v-file-input @change="setPhoto"></v-file-input>
+                  </v-card-text>
                 </v-card>
                 <div class="text-right">
-                  <v-btn color="primary" @click="e1 = 2"> Continue </v-btn>
+                  <v-btn
+                    color="primary"
+                    @click="uploadToIPFS"
+                    :loading="uploadLoading"
+                  >
+                    Upload
+                  </v-btn>
                 </div>
               </v-stepper-content>
 
               <v-stepper-content step="2">
                 <v-card class="mb-12" color=" lighten-1" height="200px">
                   <v-card-title> Make a NFT </v-card-title>
+                  <v-card-text>
+                    <v-text-field
+                      v-model="cid"
+                      label="CIDv0"
+                      required
+                    ></v-text-field>
+                  </v-card-text>
                 </v-card>
                 <div class="text-right">
                   <v-btn text @click="e1 = 1" class="mr-3">
@@ -52,7 +68,7 @@
                     <div>
                       Your picture on IPFS:
                       <v-btn
-                        href="http://ipfs.infura.io:5001/api/v0/cat?arg=QmNYwRFaQTYzN1FxvTkjMVPHiTvAw53EmziLjLDa921u23"
+                        :href="`http://ipfs.infura.io:5001/api/v0/cat?arg=${cid}`"
                         target="black"
                         small
                         text
@@ -106,20 +122,43 @@
 </template>
 
 <script>
+import axios from "axios";
 export default {
   name: "PhotoNFT",
   props: {
-    value: Boolean
+    value: Boolean,
+    uploadLoading: false
   },
   data() {
     return {
-      e1: 1
+      e1: 1,
+      photo: null,
+      cid: ""
     };
   },
   methods: {
     close() {
       this.dialog = false;
       this.$nextTick(() => {});
+    },
+    setPhoto(event) {
+      this.photo = event;
+      console.log(this.photo);
+    },
+    uploadToIPFS() {
+      this.uploadLoading = true;
+      let formData = new FormData();
+      formData.append("Photo", this.photo);
+      axios
+        .post("https://ipfs.infura.io:5001/api/v0/add", formData)
+        .then((res) => {
+          this.uploadLoading = false;
+          this.cid = res.data.Hash;
+          this.e1 = 2;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
   },
   computed: {

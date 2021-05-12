@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@metamask/detect-provider": "^1.2.0",
+    "axios": "^0.21.1",
     "ethers": "^5.1.4",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
