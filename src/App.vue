@@ -35,15 +35,15 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from "vuex";
 import detectEthereumProvider from "@metamask/detect-provider";
 export default {
   name: "App",
   data() {
-    return {
-      currentAccount: ""
-    };
+    return {};
   },
   methods: {
+    ...mapActions(["setCurrentAccount"]),
     startApp(provider) {
       // If the provider returned by detectEthereumProvider is not the same as
       // window.ethereum, something is overwriting it, perhaps another wallet.
@@ -62,7 +62,7 @@ export default {
         // MetaMask is locked or the user has not connected any accounts
         console.log("Please connect to MetaMask.");
       } else if (accounts[0] !== this.currentAccount) {
-        this.currentAccount = accounts[0];
+        this.$store.dispatch("setCurrentAccount", accounts[0]);
         // Do any other work!
       }
     },
@@ -97,6 +97,9 @@ export default {
     // If the array of accounts is non-empty, you're already
     // connected.
     ethereum.on("accountsChanged", this.handleAccountsChanged);
+  },
+  computed: {
+    ...mapGetters(["currentAccount"])
   }
 };
 </script>

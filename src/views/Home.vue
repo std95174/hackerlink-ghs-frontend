@@ -45,14 +45,6 @@
         </span>
       </v-col>
     </v-row>
-    <!-- <div>Your handsome account: {{ currentAccount }}</div>
-    <v-btn color="blue" @click="sendETH">Send 1 ETH to Frank</v-btn>
-    <v-btn color="red" @click="callContract"
-      >Frank upload something to PhotoToken contract</v-btn
-    >
-    <v-btn color="red" @click="getBalance"
-      >Frank get balance from PhotoToken contract</v-btn
-    > -->
     <photo-nft v-model="photoNFTDialog"></photo-nft>
     <license-nft v-model="licenseNFTDialog"></license-nft>
   </v-parallax>
@@ -60,8 +52,6 @@
 
 <script>
 // @ is an alias to /src
-import { ethers } from "ethers";
-import PhotoTokenJson from "../assets/contracts/PhotoToken.json";
 import PhotoNFT from "@/components/PhotoNFT.vue";
 import LicenseNFT from "@/components/LicenseNFT.vue";
 
@@ -78,96 +68,7 @@ export default {
       licenseNFTDialog: false
     };
   },
-  methods: {
-    sendETH() {
-      const vm = this;
-      ethereum.request({
-        method: "eth_sendTransaction",
-        params: [
-          {
-            from: vm.currentAccount,
-            to: vm.currentAccount,
-            value: "0xDE0B6B3A7640000"
-          }
-        ]
-      });
-    },
-    async callContract() {
-      // A Web3Provider wraps a standard Web3 provider, which is
-      // what Metamask injects as window.ethereum into each page
-      const ethersJsProvider = new ethers.providers.Web3Provider(
-        window.ethereum
-      );
-
-      // You can also use an ENS name for the contract address
-      const PhotoTokenContractAddress =
-        "0xf9a796ae51527dbc22ef28841c7f625cee732bb9";
-
-      // The ERC-20 Contract ABI, which is a common contract interface
-      // for tokens (this is the Human-Readable ABI format)
-      const PhotoTokenAbi = PhotoTokenJson.abi;
-
-      // The Contract object
-      const PhotoTokenContract = new ethers.Contract(
-        PhotoTokenContractAddress,
-        PhotoTokenAbi,
-        ethersJsProvider
-      );
-
-      // The DAI Contract is currently connected to the Provider,
-      // which is read-only. You need to connect to a Signer, so
-      // that you can pay to send state-changing transactions.
-      const PhotoTokenWithSigner = PhotoTokenContract.connect(
-        ethersJsProvider.getSigner()
-      );
-
-      // Send 1 DAI to "ricmoo.firefly.eth"
-      const tx = await PhotoTokenWithSigner.safeMint(
-        this.currentAccount,
-        1,
-        "ipfs://QmGGG"
-      );
-      console.log(tx);
-
-      // Receive an event when ANY transfer occurs
-      PhotoTokenWithSigner.on("Mint", (event) => {
-        console.log(event);
-        // The event object contains the verbatim log data, the
-        // EventFragment and functions to fetch the block,
-        // transaction and receipt and event functions
-      });
-    },
-    async getBalance() {
-      // A Web3Provider wraps a standard Web3 provider, which is
-      // what Metamask injects as window.ethereum into each page
-      const ethersJsProvider = new ethers.providers.Web3Provider(
-        window.ethereum
-      );
-
-      // You can also use an ENS name for the contract address
-      const PhotoTokenContractAddress =
-        "0xf9a796ae51527dbc22ef28841c7f625cee732bb9";
-
-      // The ERC-20 Contract ABI, which is a common contract interface
-      // for tokens (this is the Human-Readable ABI format)
-      const PhotoTokenAbi = PhotoTokenJson.abi;
-
-      // The Contract object
-      const PhotoTokenContract = new ethers.Contract(
-        PhotoTokenContractAddress,
-        PhotoTokenAbi,
-        ethersJsProvider
-      );
-
-      // The DAI Contract is currently connected to the Provider,
-      // which is read-only. You need to connect to a Signer, so
-      // that you can pay to send state-changing transactions.
-      const PhotoTokenWithSigner = PhotoTokenContract.connect(
-        ethersJsProvider.getSigner()
-      );
-      console.log(await PhotoTokenWithSigner.balanceOf(this.currentAccount));
-    }
-  },
+  methods: {},
   async mounted() {},
   async created() {}
 };

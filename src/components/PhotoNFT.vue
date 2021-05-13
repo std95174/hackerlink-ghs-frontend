@@ -53,13 +53,19 @@
                   <v-btn text @click="e1 = 1" class="mr-3">
                     <v-icon>mdi-arrow-left</v-icon>Previous
                   </v-btn>
-                  <v-btn color="primary" @click="e1 = 3"> Continue </v-btn>
+                  <v-btn
+                    color="primary"
+                    @click="mintPintureNFT"
+                    :loading="uploadLoading"
+                  >
+                    Mint
+                  </v-btn>
                 </div>
               </v-stepper-content>
 
               <v-stepper-content step="3">
                 <v-card class="mb-12" color=" lighten-1" height="200px">
-                  <v-card-title>We1l Done</v-card-title>
+                  <v-card-title>Well Done</v-card-title>
                   <v-card-text>
                     <div>
                       It's great that you make you photo a NFT. Now, time to
@@ -77,11 +83,13 @@
                         <v-icon>mdi-image</v-icon>
                       </v-btn>
                     </div>
-                    <div>Your NFT ID on Smart Contract: <span>1</span></div>
+                    <div>
+                      Your NFT ID on Smart Contract: <span>{{ tokenId }}</span>
+                    </div>
                     <div>
                       Transaction on blockchain:
                       <v-btn
-                        href="http://ipfs.infura.io:5001/api/v0/cat?arg=QmNYwRFaQTYzN1FxvTkjMVPHiTvAw53EmziLjLDa921u23"
+                        :href="`https://kovan.etherscan.io/tx/${txHash}`"
                         target="black"
                         small
                         text
@@ -122,18 +130,23 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+import { ethers } from "ethers";
+import pintureTokenJson from "../assets/contracts/PintureToken.json";
 import axios from "axios";
 export default {
   name: "PhotoNFT",
   props: {
-    value: Boolean,
-    uploadLoading: false
+    value: Boolean
   },
   data() {
     return {
       e1: 1,
       photo: null,
-      cid: ""
+      cid: "",
+      uploadLoading: false,
+      txHash: "",
+      tokenId: 0
     };
   },
   methods: {
@@ -159,9 +172,80 @@ export default {
         .catch((err) => {
           console.log(err);
         });
+    },
+    async mintPintureNFT() {
+      const ethersJsProvider = new ethers.providers.Web3Provider(
+        window.ethereum
+      );
+
+      const contractAddress = process.env.VUE_APP_PINTURE_CONTRACT_ADDRESS;
+      const abi = pintureTokenJson.abi;
+
+      // The Contract object
+      const pintureTokenContract = new ethers.Contract(
+        contractAddress,
+        abi,
+        ethersJsProvider
+      );
+      const pintureTokenWithSigner = pintureTokenContract.connect(
+        ethersJsProvider.getSigner()
+      );
+      if (this.currentAccount == "") {
+        alert("connect metamask first");
+        return;
+      }
+
+      try {
+        this.uploadLoading = true;
+        const tx = await pintureTokenWithSigner.safeMint(
+          this.currentAccount,
+          7,
+          this.cid
+        );
+        this.txHash = tx.hash;
+        const vm = this;
+        pintureTokenWithSigner.on("Transfer", (to, tokenId, cid, event) => {
+          vm.uploadLoading = false;
+          this.tokenId = event.args.tokenId.toNumber();
+          vm.e1 = 3;
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async getBalance() {
+      // A Web3Provider wraps a standard Web3 provider, which is
+      // what Metamask injects as window.ethereum into each page
+      const ethersJsProvider = new ethers.providers.Web3Provider(
+        window.ethereum
+      );
+
+      // You can also use an ENS name for the contract address
+      const PhotoTokenContractAddress =
+        "0xf9a796ae51527dbc22ef28841c7f625cee732bb9";
+
+      // The ERC-20 Contract ABI, which is a common contract interface
+      // for tokens (this is the Human-Readable ABI format)
+      const PhotoTokenAbi = PhotoTokenJson.abi;
+
+      // The Contract object
+      const PhotoTokenContract = new ethers.Contract(
+        PhotoTokenContractAddress,
+        PhotoTokenAbi,
+        ethersJsProvider
+      );
+
+      // The DAI Contract is currently connected to the Provider,
+      // which is read-only. You need to connect to a Signer, so
+      // that you can pay to send state-changing transactions.
+      const PhotoTokenWithSigner = PhotoTokenContract.connect(
+        ethersJsProvider.getSigner()
+      );
+      console.log(await PhotoTokenWithSigner.balanceOf(this.currentAccount));
     }
   },
   computed: {
+    ...mapGetters(["currentAccount"]),
     dialog: {
       get() {
         return this.value;
@@ -170,6 +254,7 @@ export default {
         this.$emit("input", value);
       }
     }
-  }
+  },
+  created() {}
 };
 </script>
