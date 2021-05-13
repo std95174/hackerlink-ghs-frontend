@@ -21,17 +21,43 @@
 
             <v-stepper-items>
               <v-stepper-content step="1">
-                <v-card class="mb-12" color=" lighten-1" height="200px">
-                  <v-card-title>Config Your License</v-card-title>
+                <v-card class="mb-12" color=" lighten-1">
+                  <v-card-title>
+                    <span class="mr-3">Choose a Pinture</span>
+                    <v-btn @click="getBalance"
+                      >Get your Pinture NFTs</v-btn
+                    ></v-card-title
+                  >
+                  <div>
+                    <v-data-table
+                      :headers="headers"
+                      :items="pintureTokens"
+                      :loading="tableLoading"
+                    >
+                      <template v-slot:[`item.actions`]="{}">
+                        <v-btn color="primary" @click="e1 = 2">
+                          Continue
+                        </v-btn>
+                      </template>
+                      <template v-slot:[`item.photo`]="{ item }">
+                        <v-row>
+                          <v-spacer></v-spacer>
+                          <v-img
+                            width="150"
+                            :src="`http://ipfs.infura.io:5001/api/v0/cat?arg=${item.photo}`"
+                          >
+                          </v-img>
+                          <v-spacer></v-spacer>
+                        </v-row>
+                      </template>
+                    </v-data-table>
+                  </div>
                 </v-card>
-                <div class="text-right">
-                  <v-btn color="primary" @click="e1 = 2"> Continue </v-btn>
-                </div>
               </v-stepper-content>
 
               <v-stepper-content step="2">
                 <v-card class="mb-12" color=" lighten-1" height="200px">
-                  <v-card-title> Make a NFT </v-card-title>
+                  <v-card-title> Config Your License </v-card-title>
                 </v-card>
                 <div class="text-right">
                   <v-btn text @click="e1 = 1" class="mr-3">
@@ -105,6 +131,9 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+import { ethers } from "ethers";
+import pintureTokenJson from "../assets/contracts/PintureToken.json";
 export default {
   name: "LicenseNFT",
   props: {
@@ -112,16 +141,78 @@ export default {
   },
   data() {
     return {
-      e1: 1
+      e1: 1,
+      headers: [
+        {
+          text: "Index",
+          align: "center",
+          value: "index",
+          width: "10%"
+        },
+        { text: "Token ID", align: "center", value: "tokenId", width: "10%" },
+        { text: "Token URI", align: "center", value: "tokenURI", width: "20%" },
+        { text: "Photo", align: "center", value: "photo", width: "40%" },
+        {
+          text: "Actions",
+          align: "center",
+          value: "actions",
+          sortable: false,
+          width: "20%"
+        }
+      ],
+      pintureTokens: [],
+      tableLoading: false
     };
   },
   methods: {
     close() {
       this.dialog = false;
       this.$nextTick(() => {});
+    },
+    async getBalance() {
+      const ethersJsProvider = new ethers.providers.Web3Provider(
+        window.ethereum
+      );
+
+      const contractAddress = process.env.VUE_APP_PINTURE_CONTRACT_ADDRESS;
+      const abi = pintureTokenJson.abi;
+
+      // The Contract object
+      const pintureTokenContract = new ethers.Contract(
+        contractAddress,
+        abi,
+        ethersJsProvider
+      );
+      const pintureTokenWithSigner = pintureTokenContract.connect(
+        ethersJsProvider.getSigner()
+      );
+      const balance = await pintureTokenWithSigner.balanceOf(
+        this.currentAccount
+      );
+      const vm = this;
+      this.tableLoading = true;
+      for (let index = 0; index < balance; index++) {
+        pintureTokenWithSigner
+          .tokenOfOwnerByIndex(this.currentAccount, index)
+          .then((tokenId) => {
+            pintureTokenWithSigner.tokenURI(tokenId).then((tokenURI) => {
+              const photo = tokenURI.split("ipfs://");
+              vm.pintureTokens.push({
+                index: index,
+                tokenId: tokenId.toNumber(),
+                tokenURI: tokenURI,
+                photo: photo[1]
+              });
+            });
+            if (index == balance - 1) {
+              vm.tableLoading = false;
+            }
+          });
+      }
     }
   },
   computed: {
+    ...mapGetters(["currentAccount"]),
     dialog: {
       get() {
         return this.value;
