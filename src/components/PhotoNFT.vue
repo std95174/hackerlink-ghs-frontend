@@ -199,7 +199,6 @@ export default {
         this.uploadLoading = true;
         const tx = await pintureTokenWithSigner.safeMint(
           this.currentAccount,
-          7,
           this.cid
         );
         this.txHash = tx.hash;
@@ -212,36 +211,6 @@ export default {
       } catch (error) {
         console.log(error);
       }
-    },
-    async getBalance() {
-      // A Web3Provider wraps a standard Web3 provider, which is
-      // what Metamask injects as window.ethereum into each page
-      const ethersJsProvider = new ethers.providers.Web3Provider(
-        window.ethereum
-      );
-
-      // You can also use an ENS name for the contract address
-      const PhotoTokenContractAddress =
-        "0xf9a796ae51527dbc22ef28841c7f625cee732bb9";
-
-      // The ERC-20 Contract ABI, which is a common contract interface
-      // for tokens (this is the Human-Readable ABI format)
-      const PhotoTokenAbi = PhotoTokenJson.abi;
-
-      // The Contract object
-      const PhotoTokenContract = new ethers.Contract(
-        PhotoTokenContractAddress,
-        PhotoTokenAbi,
-        ethersJsProvider
-      );
-
-      // The DAI Contract is currently connected to the Provider,
-      // which is read-only. You need to connect to a Signer, so
-      // that you can pay to send state-changing transactions.
-      const PhotoTokenWithSigner = PhotoTokenContract.connect(
-        ethersJsProvider.getSigner()
-      );
-      console.log(await PhotoTokenWithSigner.balanceOf(this.currentAccount));
     }
   },
   computed: {
