@@ -40,15 +40,30 @@
                         </v-btn>
                       </template>
                       <template v-slot:[`item.photo`]="{ item }">
-                        <v-row>
-                          <v-spacer></v-spacer>
-                          <v-img
-                            width="150"
-                            :src="`http://ipfs.infura.io:5001/api/v0/cat?arg=${item.photo}`"
-                          >
-                          </v-img>
-                          <v-spacer></v-spacer>
-                        </v-row>
+                        <v-container>
+                          <v-row align="center" justify="center">
+                            <v-flex xs4>
+                              <v-layout justify-center align-center>
+                                <v-img
+                                  width="250"
+                                  :src="`http://ipfs.infura.io:5001/api/v0/cat?arg=${item.photo}`"
+                                >
+                                </v-img>
+                              </v-layout>
+                            </v-flex>
+                          </v-row>
+                        </v-container>
+                        <!-- <div class="text-center">
+                          <v-flex xs4>
+                            <v-layout justify-center align-center>
+                              <v-img
+                                width="250"
+                                :src="`http://ipfs.infura.io:5001/api/v0/cat?arg=${item.photo}`"
+                              >
+                              </v-img>
+                            </v-layout>
+                          </v-flex>
+                        </div> -->
                       </template>
                     </v-data-table>
                   </div>
@@ -133,7 +148,7 @@
 <script>
 import { mapGetters } from "vuex";
 import { ethers } from "ethers";
-import pintureTokenJson from "../assets/contracts/PintureToken.json";
+import pictureTokenJson from "../assets/contracts/PictureToken.json";
 export default {
   name: "LicenseNFT",
   props: {
@@ -149,7 +164,7 @@ export default {
           value: "index",
           width: "10%"
         },
-        { text: "Token ID", align: "center", value: "tokenId", width: "10%" },
+        // { text: "Token ID", align: "center", value: "tokenId", width: "10%" },
         { text: "Token URI", align: "center", value: "tokenURI", width: "20%" },
         { text: "Photo", align: "center", value: "photo", width: "40%" },
         {
@@ -175,31 +190,39 @@ export default {
       );
 
       const contractAddress = process.env.VUE_APP_PINTURE_CONTRACT_ADDRESS;
-      const abi = pintureTokenJson.abi;
+      const abi = pictureTokenJson.abi;
 
       // The Contract object
-      const pintureTokenContract = new ethers.Contract(
+      const pictureTokenContract = new ethers.Contract(
         contractAddress,
         abi,
         ethersJsProvider
       );
-      const pintureTokenWithSigner = pintureTokenContract.connect(
+      const pictureTokenWithSigner = pictureTokenContract.connect(
         ethersJsProvider.getSigner()
       );
-      const balance = await pintureTokenWithSigner.balanceOf(
+      if (this.currentAccount == "") {
+        alert("connect metamask first");
+        return;
+      }
+      const balance = await pictureTokenWithSigner.balanceOf(
         this.currentAccount
       );
       const vm = this;
       this.tableLoading = true;
+      console.log(this.currentAccount);
+
       for (let index = 0; index < balance; index++) {
-        pintureTokenWithSigner
+        pictureTokenWithSigner
           .tokenOfOwnerByIndex(this.currentAccount, index)
           .then((tokenId) => {
-            pintureTokenWithSigner.tokenURI(tokenId).then((tokenURI) => {
+            pictureTokenWithSigner.tokenURI(tokenId).then((tokenURI) => {
+              console.log(tokenURI);
+
               const photo = tokenURI.split("ipfs://");
               vm.pintureTokens.push({
                 index: index,
-                tokenId: tokenId.toNumber(),
+                tokenId: tokenId,
                 tokenURI: tokenURI,
                 photo: photo[1]
               });

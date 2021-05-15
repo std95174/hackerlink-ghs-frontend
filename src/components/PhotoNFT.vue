@@ -132,7 +132,7 @@
 <script>
 import { mapGetters } from "vuex";
 import { ethers } from "ethers";
-import pintureTokenJson from "../assets/contracts/PintureToken.json";
+import pictureTokenJson from "../assets/contracts/PictureToken.json";
 import axios from "axios";
 export default {
   name: "PhotoNFT",
@@ -179,15 +179,15 @@ export default {
       );
 
       const contractAddress = process.env.VUE_APP_PINTURE_CONTRACT_ADDRESS;
-      const abi = pintureTokenJson.abi;
+      const abi = pictureTokenJson.abi;
 
       // The Contract object
-      const pintureTokenContract = new ethers.Contract(
+      const pictureTokenContract = new ethers.Contract(
         contractAddress,
         abi,
         ethersJsProvider
       );
-      const pintureTokenWithSigner = pintureTokenContract.connect(
+      const pictureTokenWithSigner = pictureTokenContract.connect(
         ethersJsProvider.getSigner()
       );
       if (this.currentAccount == "") {
@@ -197,15 +197,20 @@ export default {
 
       try {
         this.uploadLoading = true;
-        const tx = await pintureTokenWithSigner.safeMint(
+        const tx = await pictureTokenWithSigner.safeMint(
           this.currentAccount,
           this.cid
         );
         this.txHash = tx.hash;
+      } catch (error) {
+        alert("cid duplicated");
+      }
+
+      try {
         const vm = this;
-        pintureTokenWithSigner.on("Transfer", (to, tokenId, cid, event) => {
+        pictureTokenWithSigner.on("Transfer", (to, tokenId, cid, event) => {
           vm.uploadLoading = false;
-          this.tokenId = event.args.tokenId.toNumber();
+          this.tokenId = event.args.tokenId._hex;
           vm.e1 = 3;
         });
       } catch (error) {
