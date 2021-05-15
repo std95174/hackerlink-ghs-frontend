@@ -24,7 +24,7 @@
                 <v-card class="mb-12" color=" lighten-1">
                   <v-card-title>
                     <span class="mr-3">Choose a Pinture</span>
-                    <v-btn @click="getBalance"
+                    <v-btn @click="getPictureTokens"
                       >Get your Pinture NFTs</v-btn
                     ></v-card-title
                   >
@@ -34,14 +34,9 @@
                       :items="pintureTokens"
                       :loading="tableLoading"
                     >
-                      <template v-slot:[`item.actions`]="{}">
-                        <v-btn color="primary" @click="e1 = 2">
-                          Continue
-                        </v-btn>
-                      </template>
                       <template v-slot:[`item.photo`]="{ item }">
                         <v-container>
-                          <v-row align="center" justify="center">
+                          <v-row align="center" justify="center" class="pa-3">
                             <v-flex xs4>
                               <v-layout justify-center align-center>
                                 <v-img
@@ -53,17 +48,11 @@
                             </v-flex>
                           </v-row>
                         </v-container>
-                        <!-- <div class="text-center">
-                          <v-flex xs4>
-                            <v-layout justify-center align-center>
-                              <v-img
-                                width="250"
-                                :src="`http://ipfs.infura.io:5001/api/v0/cat?arg=${item.photo}`"
-                              >
-                              </v-img>
-                            </v-layout>
-                          </v-flex>
-                        </div> -->
+                      </template>
+                      <template v-slot:[`item.actions`]="{}">
+                        <v-btn color="primary" @click="e1 = 2">
+                          Continue
+                        </v-btn>
                       </template>
                     </v-data-table>
                   </div>
@@ -184,7 +173,7 @@ export default {
       this.dialog = false;
       this.$nextTick(() => {});
     },
-    async getBalance() {
+    async getPictureTokens() {
       const ethersJsProvider = new ethers.providers.Web3Provider(
         window.ethereum
       );
