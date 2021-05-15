@@ -7040,6 +7040,11 @@
   "resolved" "https://registry.nlark.com/vue/download/vue-2.6.12.tgz"
   "version" "2.6.12"
 
+"vuelidate@^0.7.6":
+  "integrity" "sha512-suzIuet1jGcyZ4oUSW8J27R2tNrJ9cIfklAh63EbAkFjE380iv97BAiIeolRYoB9bF9usBXCu4BxftWN1Dkn3g=="
+  "resolved" "https://registry.npmjs.org/vuelidate/-/vuelidate-0.7.6.tgz"
+  "version" "0.7.6"
+
 "vuetify-loader@^1.7.0":
   "integrity" "sha512-2GSo4KvRAOThBsj8mvtIEeIoyBAZx38GDfh8D90e/or7Hzx4813krJKvcQAllyLO/Ln0eQWrq2IuvBXnZ55cSA=="
   "resolved" "https://registry.npmjs.org/vuetify-loader/-/vuetify-loader-1.7.2.tgz"
