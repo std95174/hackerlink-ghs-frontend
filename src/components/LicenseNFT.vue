@@ -166,7 +166,9 @@
                   <v-btn text @click="e1 = 1" class="mr-3">
                     <v-icon>mdi-arrow-left</v-icon>Previous
                   </v-btn>
-                  <v-btn color="primary" @click="submit"> Mint </v-btn>
+                  <v-btn color="primary" @click="submit" :loading="loading">
+                    Mint
+                  </v-btn>
                 </div>
               </v-stepper-content>
 
@@ -180,21 +182,19 @@
                     </div>
                     <div>
                       Your picture on IPFS:
-                      <v-btn
-                        href="http://ipfs.infura.io:5001/api/v0/cat?arg=QmNYwRFaQTYzN1FxvTkjMVPHiTvAw53EmziLjLDa921u23"
-                        target="black"
-                        small
-                        text
-                      >
+                      <v-btn :href="tokenUri" target="black" small text>
                         click me
                         <v-icon>mdi-image</v-icon>
                       </v-btn>
                     </div>
-                    <div>Your NFT ID on Smart Contract: <span>1</span></div>
+                    <div>
+                      Your License NFT ID on Smart Contract:
+                      <span>{{ licenseTokenId }}</span>
+                    </div>
                     <div>
                       Transaction on blockchain:
                       <v-btn
-                        href="http://ipfs.infura.io:5001/api/v0/cat?arg=QmNYwRFaQTYzN1FxvTkjMVPHiTvAw53EmziLjLDa921u23"
+                        :href="`https://kovan.etherscan.io/tx/${txHash}`"
                         target="black"
                         small
                         text
@@ -237,6 +237,7 @@
 import { mapGetters } from "vuex";
 import { ethers } from "ethers";
 import pictureTokenJson from "../assets/contracts/PictureToken.json";
+import licenseTokenJson from "../assets/contracts/LicenseToken.json";
 import { validationMixin } from "vuelidate";
 import {
   required,
@@ -272,6 +273,7 @@ export default {
       ],
       pintureTokens: [],
       tableLoading: false,
+      loading: false,
 
       // form
       to: "",
@@ -282,7 +284,11 @@ export default {
       startTime: "",
       endTime: "",
       startTimeMenu: false,
-      endTimeMenu: false
+      endTimeMenu: false,
+
+      // result
+      txHash: "",
+      licenseTokenId: ""
     };
   },
   mixins: [validationMixin],
@@ -306,6 +312,7 @@ export default {
       this.$nextTick(() => {});
     },
     async getPictureTokens() {
+      this.pintureTokens.length = 0;
       const ethersJsProvider = new ethers.providers.Web3Provider(
         window.ethereum
       );
@@ -357,7 +364,6 @@ export default {
       this.tokenUri = tokenUri;
       this.e1 = 2;
     },
-    // vuelidate
     submit() {
       console.log("submit!");
       this.$v.$touch();
@@ -365,7 +371,70 @@ export default {
         this.submitStatus = "ERROR";
       } else {
         // do your submit logic here
-        this.e1 = 3;
+        this.mintLicenseNFT();
+        // this.e1 = 3;
+      }
+    },
+    async mintLicenseNFT() {
+      const ethersJsProvider = new ethers.providers.Web3Provider(
+        window.ethereum
+      );
+
+      const contractAddress = process.env.VUE_APP_LICENSE_CONTRACT_ADDRESS;
+      const abi = licenseTokenJson.abi;
+
+      // The Contract object
+      const licenseTokenContract = new ethers.Contract(
+        contractAddress,
+        abi,
+        ethersJsProvider
+      );
+      const licenseTokenWithSigner = licenseTokenContract.connect(
+        ethersJsProvider.getSigner()
+      );
+      if (this.currentAccount == "") {
+        alert("connect metamask first");
+        return;
+      }
+
+      try {
+        this.loading = true;
+        const tx = await licenseTokenWithSigner.safeMint(
+          this.to,
+          this.tokenId,
+          new Date(this.startTime).getTime(),
+          new Date(this.endTime).getTime(),
+          this.quantity,
+          this.tokenUri,
+          Math.floor(Math.random() * 4294967296)
+        );
+        this.txHash = tx.hash;
+      } catch (error) {
+        alert("cid duplicated");
+      }
+
+      try {
+        const vm = this;
+        licenseTokenWithSigner.on(
+          "Mint",
+          (
+            to,
+            pictureTokenId,
+            licenseTokenId,
+            startTime,
+            endTime,
+            quantity,
+            randomNum,
+            event
+          ) => {
+            vm.loading = false;
+            console.log(event);
+            this.licenseTokenId = licenseTokenId;
+            vm.e1 = 3;
+          }
+        );
+      } catch (error) {
+        console.log(error);
       }
     }
   },
