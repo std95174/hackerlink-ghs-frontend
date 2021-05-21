@@ -5,10 +5,15 @@
   >
     <v-row align="center" justify="center">
       <v-col class="text-center" cols="12">
-        <h1 class="display-1 font-weight-thin mb-4">Pinture</h1>
-        <h3 class="subheading">
-          Pinture is a service that make creators license their picture easily.
-        </h3>
+        <v-slide-y-transition>
+          <div v-show="show">
+            <h1 class="display-1 font-weight-thin mb-4">Pinture</h1>
+            <h3 class="subheading">
+              Pinture is a service that make creators license their picture
+              easily.
+            </h3>
+          </div>
+        </v-slide-y-transition>
       </v-col>
     </v-row>
     <v-row align="center" justify="center">
@@ -65,12 +70,18 @@ export default {
     return {
       currentAccount: "unconnected yet",
       photoNFTDialog: false,
-      licenseNFTDialog: false
+      licenseNFTDialog: false,
+      show: false
     };
   },
   methods: {},
   async mounted() {},
-  async created() {}
+  async created() {
+    const vm = this;
+    setTimeout(function () {
+      vm.show = true;
+    }, 500);
+  }
 };
 </script>
 

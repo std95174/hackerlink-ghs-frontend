@@ -13,13 +13,17 @@
           </h5>
         </v-col>
         <v-col cols="4" class="text-center">
-          <router-link :to="{ name: 'Home' }">
-            <v-btn text>
-              <span class="mr-2">Pinture</span>
-            </v-btn>
+          <router-link :to="{ name: 'Home' }" class="text-decoration-none" text>
+            <span class="mr-2">Pinture</span>
           </router-link>
         </v-col>
         <v-col cols="4" class="text-right">
+          <router-link :to="{ name: 'Market' }" class="text-decoration-none">
+            <v-btn text>
+              <span>{{ "Market 🛒" }}</span>
+            </v-btn>
+          </router-link>
+
           <v-btn text @click="connect">
             <span class="mr-2">{{
               currentAccount === "" ? "Connect 🦊" : "Connected 🦊"
@@ -107,19 +111,19 @@ export default {
 <style scoped>
 a:link {
   text-decoration: none;
+  color: white;
 }
 
 a:visited {
   text-decoration: none;
+  color: white;
 }
 
 a:hover {
   text-decoration: underline;
-  color: white;
 }
 
 a:active {
   text-decoration: underline;
-  color: white;
 }
 </style>
