@@ -178,7 +178,7 @@ export default {
         window.ethereum
       );
 
-      const contractAddress = process.env.VUE_APP_PINTURE_CONTRACT_ADDRESS;
+      const contractAddress = process.env.VUE_APP_PICTURE_CONTRACT_ADDRESS;
       const abi = pictureTokenJson.abi;
 
       // The Contract object
@@ -204,6 +204,7 @@ export default {
         this.txHash = tx.hash;
       } catch (error) {
         alert("cid duplicated");
+        this.uploadLoading = false;
       }
 
       try {

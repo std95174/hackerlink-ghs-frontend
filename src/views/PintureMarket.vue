@@ -17,7 +17,16 @@
       </v-col>
     </v-row>
     <v-row align="center" justify="center">
-      <v-data-table></v-data-table>
+      <v-col class="text-right"
+        ><v-btn @click="photoNFTDialog = true"
+          >📷 Make Your Photo NFT</v-btn
+        ></v-col
+      >
+      <v-col class="text-left"
+        ><v-btn @click="licenseNFTDialog = true"
+          >Make Your License NFT 🔐</v-btn
+        ></v-col
+      >
     </v-row>
     <v-row class="mr-6 ml-6 pa-6">
       <v-col>

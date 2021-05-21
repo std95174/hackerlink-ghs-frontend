@@ -17,16 +17,19 @@
       </v-col>
     </v-row>
     <v-row align="center" justify="center">
-      <v-col class="text-right"
-        ><v-btn @click="photoNFTDialog = true"
-          >📷 Make Your Photo NFT</v-btn
-        ></v-col
-      >
-      <v-col class="text-left"
+      <v-col class="text-right">
+        <v-btn @click="photoNFTDialog = true">📷 Make Your Photo NFT </v-btn>
+      </v-col>
+      <v-col class="text-center"
         ><v-btn @click="licenseNFTDialog = true"
           >Make Your License NFT 🔐</v-btn
-        ></v-col
-      >
+        >
+      </v-col>
+      <v-col class="text-left"
+        ><v-btn @click="sellLicenseNFTDialog = true"
+          >Sell Your License 🛒</v-btn
+        >
+      </v-col>
     </v-row>
     <v-row class="mr-6 ml-6 pa-6">
       <v-col>
@@ -52,6 +55,7 @@
     </v-row>
     <photo-nft v-model="photoNFTDialog"></photo-nft>
     <license-nft v-model="licenseNFTDialog"></license-nft>
+    <sell-license-nft v-model="sellLicenseNFTDialog"></sell-license-nft>
   </v-parallax>
 </template>
 
@@ -59,18 +63,21 @@
 // @ is an alias to /src
 import PhotoNFT from "@/components/PhotoNFT.vue";
 import LicenseNFT from "@/components/LicenseNFT.vue";
+import SellLicenseNFT from "@/components/SellLicenseNFT.vue";
 
 export default {
   name: "Home",
   components: {
     "photo-nft": PhotoNFT,
-    "license-nft": LicenseNFT
+    "license-nft": LicenseNFT,
+    "sell-license-nft": SellLicenseNFT
   },
   data() {
     return {
       currentAccount: "unconnected yet",
       photoNFTDialog: false,
       licenseNFTDialog: false,
+      sellLicenseNFTDialog: false,
       show: false
     };
   },

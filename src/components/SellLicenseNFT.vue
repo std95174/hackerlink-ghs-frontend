@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="dialog">
     <v-card>
-      <v-card-title class="headline">Make Your License NFT</v-card-title>
+      <v-card-title class="headline">Sell Your License</v-card-title>
       <v-card-text>
         <div>
           <v-stepper v-model="e1">
@@ -12,7 +12,9 @@
 
               <v-divider></v-divider>
 
-              <v-stepper-step :complete="e1 > 2" step="2"> NFT </v-stepper-step>
+              <v-stepper-step :complete="e1 > 2" step="2">
+                Set Price
+              </v-stepper-step>
 
               <v-divider></v-divider>
 
@@ -23,15 +25,15 @@
               <v-stepper-content step="1">
                 <v-card class="mb-12" color=" lighten-1">
                   <v-card-title>
-                    <span class="mr-3">Choose a Pinture</span>
-                    <v-btn @click="getPictureTokens"
-                      >Get your Pinture NFTs</v-btn
+                    <span class="mr-3">Choose a License</span>
+                    <v-btn @click="getLicenseTokens"
+                      >Get your License NFTs</v-btn
                     ></v-card-title
                   >
                   <div>
                     <v-data-table
                       :headers="headers"
-                      :items="pintureTokens"
+                      :items="licenseTokens"
                       :loading="tableLoading"
                     >
                       <template v-slot:[`item.photo`]="{ item }">
@@ -53,10 +55,12 @@
                         <v-btn
                           color="primary"
                           @click="
-                            choosePictureToken(item.tokenId, item.tokenUri)
+                            approveToPincture(item.tokenId, item.tokenUri)
                           "
+                          :disabled="loading"
+                          :loading="loading"
                         >
-                          Continue
+                          Approve
                         </v-btn>
                       </template>
                     </v-data-table>
@@ -66,18 +70,9 @@
 
               <v-stepper-content step="2">
                 <v-card class="mb-12" color=" lighten-1">
-                  <v-card-title> Config Your License </v-card-title>
+                  <v-card-title> </v-card-title>
                   <v-card-text>
                     <form>
-                      <v-text-field
-                        v-model="to"
-                        :error-messages="toErrors"
-                        :counter="42"
-                        label="Address You Want To Authorize"
-                        required
-                        @input="$v.to.$touch()"
-                        @blur="$v.to.$touch()"
-                      ></v-text-field>
                       <v-text-field
                         v-model="tokenId"
                         :error-messages="tokenIdErrors"
@@ -92,64 +87,15 @@
                         disabled
                         required
                       ></v-text-field>
-                      <v-menu
-                        v-model="startTimeMenu"
-                        :close-on-content-click="false"
-                        :nudge-right="40"
-                        transition="scale-transition"
-                        offset-y
-                        min-width="auto"
-                      >
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-text-field
-                            v-model="startTime"
-                            :error-messages="startTimeErrors"
-                            label="Click to Pick Start Time"
-                            readonly
-                            v-bind="attrs"
-                            v-on="on"
-                            @change="$v.startTime.$touch()"
-                            @blur="$v.startTime.$touch()"
-                          ></v-text-field>
-                        </template>
-                        <v-date-picker
-                          v-model="startTime"
-                          @input="startTimeMenu = false"
-                        ></v-date-picker>
-                      </v-menu>
-                      <v-menu
-                        v-model="endTimeMenu"
-                        :close-on-content-click="false"
-                        :nudge-right="40"
-                        transition="scale-transition"
-                        offset-y
-                        min-width="auto"
-                      >
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-text-field
-                            v-model="endTime"
-                            :error-messages="endTimeErrors"
-                            label="Click to Pick End Time"
-                            readonly
-                            v-bind="attrs"
-                            v-on="on"
-                            @change="$v.endTime.$touch()"
-                            @blur="$v.endTime.$touch()"
-                          ></v-text-field>
-                        </template>
-                        <v-date-picker
-                          v-model="endTime"
-                          @input="endTimeMenu = false"
-                        ></v-date-picker>
-                      </v-menu>
+
                       <v-text-field
-                        v-model="quantity"
-                        :error-messages="quantityErrors"
+                        v-model="price"
+                        :error-messages="priceErrors"
                         type="number"
-                        label="Quantity"
+                        label="Price"
                         required
-                        @change="$v.quantity.$touch()"
-                        @blur="$v.quantity.$touch()"
+                        @change="$v.price.$touch()"
+                        @blur="$v.price.$touch()"
                       ></v-text-field>
                       <v-checkbox
                         v-model="checkbox"
@@ -167,19 +113,16 @@
                     <v-icon>mdi-arrow-left</v-icon>Previous
                   </v-btn>
                   <v-btn color="primary" @click="submit" :loading="loading">
-                    Mint
+                    Set Price
                   </v-btn>
                 </div>
               </v-stepper-content>
 
               <v-stepper-content step="3">
                 <v-card class="mb-12" color=" lighten-1" height="200px">
-                  <v-card-title>We1l Done</v-card-title>
+                  <v-card-title>Well Done</v-card-title>
                   <v-card-text>
-                    <div>
-                      It's great that you make you photo a NFT. Now, time to
-                      make a its license NFT and make some money!
-                    </div>
+                    <div>Now Your license is on Market!</div>
                     <div>
                       Your picture on IPFS:
                       <v-btn :href="tokenUri" target="black" small text>
@@ -190,6 +133,10 @@
                     <div>
                       Your License NFT ID on Smart Contract:
                       <span>{{ licenseTokenId }}</span>
+                    </div>
+                    <div>
+                      Price:
+                      <span>{{ price }}</span>
                     </div>
                     <div>
                       Transaction on blockchain:
@@ -236,8 +183,8 @@
 <script>
 import { mapGetters } from "vuex";
 import { ethers } from "ethers";
-import pictureTokenJson from "../assets/contracts/PictureToken.json";
 import licenseTokenJson from "../assets/contracts/LicenseToken.json";
+import pintureJson from "../assets/contracts/Pinture.json";
 import { validationMixin } from "vuelidate";
 import {
   required,
@@ -246,7 +193,7 @@ import {
   minValue
 } from "vuelidate/lib/validators";
 export default {
-  name: "LicenseNFT",
+  name: "SellLicenseNFT",
   props: {
     value: Boolean
   },
@@ -271,7 +218,7 @@ export default {
           width: "20%"
         }
       ],
-      pintureTokens: [],
+      licenseTokens: [],
       tableLoading: false,
       loading: false,
 
@@ -288,18 +235,16 @@ export default {
 
       // result
       txHash: "",
-      licenseTokenId: ""
+      licenseTokenId: "",
+      price: 0
     };
   },
   mixins: [validationMixin],
 
   validations: {
-    to: { required, maxLength: maxLength(42), minLength: minLength(42) },
     tokenId: { required },
     tokenUri: { required },
-    quantity: { required, minValue: minValue(1) },
-    startTime: { required },
-    endTime: { required },
+    price: { required, minValue: minValue(1) },
     checkbox: {
       checked(val) {
         return val;
@@ -311,46 +256,52 @@ export default {
       this.dialog = false;
       this.$nextTick(() => {});
     },
-    async getPictureTokens() {
-      this.pintureTokens.length = 0;
+    async getLicenseTokens() {
+      this.licenseTokens.length = 0;
       const ethersJsProvider = new ethers.providers.Web3Provider(
         window.ethereum
       );
 
-      const contractAddress = process.env.VUE_APP_PICTURE_CONTRACT_ADDRESS;
-      const abi = pictureTokenJson.abi;
+      const contractAddress = process.env.VUE_APP_LICENSE_CONTRACT_ADDRESS;
+      const abi = licenseTokenJson.abi;
 
       // The Contract object
-      const pictureTokenContract = new ethers.Contract(
+      const licenseTokenContract = new ethers.Contract(
         contractAddress,
         abi,
         ethersJsProvider
       );
-      const pictureTokenWithSigner = pictureTokenContract.connect(
+      const licenseTokenWithSigner = licenseTokenContract.connect(
         ethersJsProvider.getSigner()
       );
       if (this.currentAccount == "") {
         alert("connect metamask first");
         return;
       }
-      const balance = await pictureTokenWithSigner.balanceOf(
+      const balance = await licenseTokenWithSigner.balanceOf(
         this.currentAccount
       );
+      if (balance == 0) {
+        alert("sorry, you don't have any licenses");
+        this.tableLoading = false;
+        return;
+      }
       const vm = this;
       this.tableLoading = true;
       console.log(this.currentAccount);
 
       for (let index = 0; index < balance; index++) {
-        pictureTokenWithSigner
+        licenseTokenWithSigner
           .tokenOfOwnerByIndex(this.currentAccount, index)
           .then((tokenId) => {
-            pictureTokenWithSigner.tokenURI(tokenId).then((tokenUri) => {
-              const photo = tokenUri.split("ipfs://");
-              vm.pintureTokens.push({
+            licenseTokenWithSigner.tokenURI(tokenId).then((tokenUri) => {
+              console.log(tokenUri);
+              const cid = tokenUri.split("ipfs://");
+              vm.licenseTokens.push({
                 index: index,
                 tokenId: tokenId,
                 tokenUri: tokenUri,
-                photo: photo[1]
+                photo: cid[1]
               });
             });
             if (index == balance - 1) {
@@ -359,23 +310,9 @@ export default {
           });
       }
     },
-    choosePictureToken(tokenId, tokenUri) {
-      this.tokenId = tokenId._hex;
+    async approveToPincture(tokenId, tokenUri) {
+      this.tokenId = tokenId;
       this.tokenUri = tokenUri;
-      this.e1 = 2;
-    },
-    submit() {
-      console.log("submit!");
-      this.$v.$touch();
-      if (this.$v.$invalid) {
-        this.submitStatus = "ERROR";
-      } else {
-        // do your submit logic here
-        this.mintLicenseNFT();
-        // this.e1 = 3;
-      }
-    },
-    async mintLicenseNFT() {
       const ethersJsProvider = new ethers.providers.Web3Provider(
         window.ethereum
       );
@@ -398,45 +335,93 @@ export default {
       }
 
       try {
-        const cid = this.tokenUri.split("ipfs://");
         this.loading = true;
-        const tx = await licenseTokenWithSigner.safeMint(
-          this.to,
-          this.tokenId,
-          new Date(this.startTime).getTime(),
-          new Date(this.endTime).getTime(),
-          this.quantity,
-          cid[1],
-          Math.floor(Math.random() * 4294967296)
+        console.log(licenseTokenWithSigner);
+        const tx = await licenseTokenWithSigner.approve(
+          process.env.VUE_APP_PINTURE_CONTRACT_ADDRESS,
+          tokenId
         );
         this.txHash = tx.hash;
       } catch (error) {
-        alert("cid duplicated");
-        this.loading = true;
+        this.loading = false;
+        console.log(error);
+        alert("something error");
+        return;
       }
 
       try {
         const vm = this;
         licenseTokenWithSigner.on(
-          "Mint",
-          (
-            to,
-            pictureTokenId,
-            licenseTokenId,
-            startTime,
-            endTime,
-            quantity,
-            randomNum,
-            event
-          ) => {
+          "Approval",
+          (owner, to, licenseTokenId, event) => {
             vm.loading = false;
             console.log(event);
             this.licenseTokenId = licenseTokenId;
+            vm.e1 = 2;
+          }
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async setPrice() {
+      const ethersJsProvider = new ethers.providers.Web3Provider(
+        window.ethereum
+      );
+
+      const contractAddress = process.env.VUE_APP_PINTURE_CONTRACT_ADDRESS;
+      const abi = pintureJson.abi;
+
+      // The Contract object
+      const pintureContract = new ethers.Contract(
+        contractAddress,
+        abi,
+        ethersJsProvider
+      );
+      const pintureWithSigner = pintureContract.connect(
+        ethersJsProvider.getSigner()
+      );
+      if (this.currentAccount == "") {
+        alert("connect metamask first");
+        return;
+      }
+
+      try {
+        this.loading = true;
+        const tx = await pintureWithSigner.setPrice(this.tokenId, this.price);
+        this.txHash = tx.hash;
+      } catch (error) {
+        this.loading = false;
+        console.log(error);
+        alert("something error");
+        return;
+      }
+
+      try {
+        const vm = this;
+        pintureContract.on(
+          "SetPrice",
+          (sender, licenseTokenId, price, event) => {
+            vm.loading = false;
+            console.log(event);
+            this.licenseTokenId = licenseTokenId;
+            this.price = price;
             vm.e1 = 3;
           }
         );
       } catch (error) {
         console.log(error);
+      }
+    },
+    submit() {
+      console.log("submit!");
+      this.$v.$touch();
+      if (this.$v.$invalid) {
+        this.submitStatus = "ERROR";
+      } else {
+        // do your submit logic here
+        this.setPrice();
+        // this.e1 = 3;
       }
     }
   },
@@ -456,16 +441,6 @@ export default {
       !this.$v.checkbox.checked && errors.push("You must agree to continue!");
       return errors;
     },
-    toErrors() {
-      const errors = [];
-      if (!this.$v.to.$dirty) return errors;
-      !this.$v.to.maxLength &&
-        errors.push("Address must be 42 characters and with 0x prefix");
-      !this.$v.to.minLength &&
-        errors.push("Address must be 42 characters and with 0x prefix");
-      !this.$v.to.required && errors.push("Address is required.");
-      return errors;
-    },
     tokenIdErrors() {
       const errors = [];
       if (!this.$v.tokenId.$dirty) return errors;
@@ -478,23 +453,11 @@ export default {
       !this.$v.tokenUri.required && errors.push("Token Uri is required");
       return errors;
     },
-    quantityErrors() {
+    priceErrors() {
       const errors = [];
-      if (!this.$v.quantity.$dirty) return errors;
-      !this.$v.quantity.minValue && errors.push("Quantity must be > 0");
-      !this.$v.quantity.required && errors.push("Quantity is required");
-      return errors;
-    },
-    startTimeErrors() {
-      const errors = [];
-      if (!this.$v.startTime.$dirty) return errors;
-      !this.$v.startTime.required && errors.push("Start Time is required");
-      return errors;
-    },
-    endTimeErrors() {
-      const errors = [];
-      if (!this.$v.endTime.$dirty) return errors;
-      !this.$v.endTime.required && errors.push("End Time is required");
+      if (!this.$v.price.$dirty) return errors;
+      !this.$v.price.minValue && errors.push("Price must be > 0");
+      !this.$v.price.required && errors.push("Price is required");
       return errors;
     }
   }
