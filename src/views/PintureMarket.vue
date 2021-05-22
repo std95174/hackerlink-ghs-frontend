@@ -16,7 +16,7 @@
         </v-slide-y-transition>
       </v-col>
     </v-row>
-    <v-row align="center" justify="center" class="mb-3">
+    <v-row align="center" justify="center" class="mb-3 mr-3 ml-3">
       <v-data-table
         :headers="headers"
         :items="pintures"
@@ -43,11 +43,13 @@
         <template v-slot:[`item.price`]="{ item }">
           {{ item.price }} ETH
         </template>
-        <template v-slot:[`item.actions`]="{}">
+        <template v-slot:[`item.actions`]="{ item }">
           <v-btn
             color="primary"
-            @click="alert('this feature is on the way!')"
+            @click="buy(item.tokenId, item.price)"
             outlined
+            :disabled="txLoading"
+            :loading="txLoading"
           >
             Buy
           </v-btn>
@@ -58,6 +60,7 @@
 </template>
   
 <script>
+import { mapGetters } from "vuex";
 import { ethers } from "ethers";
 import { pintureWithSigner, licenseTokenWithSigner } from "@/common/contract";
 
@@ -71,6 +74,9 @@ export default {
         // { text: "Token URI", align: "center", value: "tokenUri" },
         { text: "Photo", align: "center", value: "photo" },
         { text: "Price", align: "center", value: "price" },
+        { text: "Quantity", align: "center", value: "quantity" },
+        { text: "Start", align: "center", value: "startTime" },
+        { text: "End", align: "center", value: "endTime" },
         {
           text: "Actions",
           align: "center",
@@ -79,33 +85,69 @@ export default {
         }
       ],
       pintures: [],
-      loading: false
+      loading: false,
+      txLoading: false
     };
   },
   methods: {
-    alert() {
-      alert("this feature is on the way!");
+    buy(tokenId, price) {
+      console.log(this.currentAccount);
+      if (this.currentAccount == "") {
+        alert("connect metamask first");
+        return;
+      }
+      try {
+        this.loading = true;
+        pintureWithSigner.buy(tokenId, {
+          value: ethers.utils.parseEther(price)
+        });
+      } catch (error) {
+        this.loading = false;
+        console.log(error);
+        alert("something error");
+        return;
+      }
+
+      try {
+        const vm = this;
+        pintureWithSigner.on("Buy", (licenseTokenId, buyer, price, event) => {
+          vm.loading = false;
+          console.log(event);
+          alert(
+            `Congratulations!! You've bount a License, ID: ${licenseTokenId}`
+          );
+        });
+      } catch (error) {
+        console.log(error);
+      }
     }
   },
   async mounted() {
     this.loading = true;
-    if (this.currentAccount == "") {
-      alert("connect metamask first");
-      return;
-    }
-
     const tokens = await pintureWithSigner.getListedTokens();
     const vm = this;
     for (let i = 0; i < tokens.length; i++) {
       pintureWithSigner.getPrice(tokens[i]).then((price) => {
-        licenseTokenWithSigner.tokenURI(tokens[i]).then((tokenUri) => {
-          const cid = tokenUri.split("ipfs://");
-          vm.pintures.push({
-            price: ethers.utils.formatEther(price),
-            tokenUri: tokenUri,
-            photo: cid[1]
+        licenseTokenWithSigner
+          .getLicenseTokenInfo(tokens[i])
+          .then((licenseTokenInfo) => {
+            licenseTokenWithSigner.tokenURI(tokens[i]).then((tokenUri) => {
+              const cid = tokenUri.split("ipfs://");
+              vm.pintures.push({
+                tokenId: tokens[i],
+                price: ethers.utils.formatEther(price),
+                tokenUri: tokenUri,
+                photo: cid[1],
+                quantity: licenseTokenInfo[1],
+                startTime: new Date(licenseTokenInfo[2].toNumber())
+                  .toISOString()
+                  .substr(0, 10),
+                endTime: new Date(licenseTokenInfo[3].toNumber())
+                  .toISOString()
+                  .substr(0, 10)
+              });
+            });
           });
-        });
       });
     }
     this.loading = false;
@@ -115,6 +157,9 @@ export default {
     setTimeout(function () {
       vm.show = true;
     }, 500);
+  },
+  computed: {
+    ...mapGetters(["currentAccount"])
   }
 };
 </script>
