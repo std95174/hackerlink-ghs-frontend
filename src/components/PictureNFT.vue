@@ -49,6 +49,7 @@
                     <v-text-field
                       v-model="cid"
                       label="CIDv0"
+                      disabled
                       required
                     ></v-text-field>
                   </v-card-text>

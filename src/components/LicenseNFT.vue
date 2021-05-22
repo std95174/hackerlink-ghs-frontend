@@ -92,7 +92,10 @@
                       ></v-text-field>
                       <v-row>
                         <v-col cols="8">
-                          <v-file-input @change="setPhoto"></v-file-input>
+                          <v-file-input
+                            @change="setPhoto"
+                            label="Actual size picture that you want to authorize"
+                          ></v-file-input>
                         </v-col>
                         <v-col cols="4">
                           <v-btn
@@ -202,7 +205,12 @@
                     </div>
                     <div>
                       Your picture on IPFS:
-                      <v-btn :href="tokenUri" target="black" small text>
+                      <v-btn
+                        :href="`http://ipfs.infura.io:5001/api/v0/cat?arg=${tokenUri}`"
+                        target="black"
+                        small
+                        text
+                      >
                         click me
                         <v-icon>mdi-image</v-icon>
                       </v-btn>
@@ -411,7 +419,7 @@ export default {
       }
 
       try {
-        const cid = this.tokenUri.split("ipfs://");
+        const cid = this.tokenUri;
         this.loading = true;
         const tx = await licenseTokenWithSigner.safeMint(
           this.to,
@@ -419,7 +427,7 @@ export default {
           new Date(this.startTime).getTime(),
           new Date(this.endTime).getTime(),
           this.quantity,
-          cid[1],
+          cid,
           Math.floor(Math.random() * 4294967296)
         );
         this.txHash = tx.hash;

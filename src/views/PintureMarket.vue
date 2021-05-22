@@ -132,7 +132,11 @@
 <script>
 import { mapGetters } from "vuex";
 import { ethers } from "ethers";
-import { pintureWithSigner, licenseTokenWithSigner } from "@/common/contract";
+import {
+  pintureWithSigner,
+  licenseTokenWithSigner,
+  pictureTokenWithSigner
+} from "@/common/contract";
 
 export default {
   name: "PintureMarket",
@@ -222,22 +226,24 @@ export default {
           licenseTokenWithSigner
             .getLicenseTokenInfo(tokens[i])
             .then((licenseTokenInfo) => {
-              licenseTokenWithSigner.tokenURI(tokens[i]).then((tokenUri) => {
-                const cid = tokenUri.split("ipfs://");
-                vm.pintures.push({
-                  tokenId: tokens[i],
-                  price: ethers.utils.formatEther(price),
-                  tokenUri: tokenUri,
-                  photo: cid[1],
-                  quantity: licenseTokenInfo[1],
-                  startTime: new Date(licenseTokenInfo[2].toNumber())
-                    .toISOString()
-                    .substr(0, 10),
-                  endTime: new Date(licenseTokenInfo[3].toNumber())
-                    .toISOString()
-                    .substr(0, 10)
+              pictureTokenWithSigner
+                .tokenURI(licenseTokenInfo[0])
+                .then((pictureTokenUri) => {
+                  const cid = pictureTokenUri.split("ipfs://");
+                  vm.pintures.push({
+                    tokenId: licenseTokenInfo[0], // picture
+                    price: ethers.utils.formatEther(price),
+                    tokenUri: pictureTokenUri,
+                    photo: cid[1],
+                    quantity: licenseTokenInfo[1],
+                    startTime: new Date(licenseTokenInfo[2].toNumber())
+                      .toISOString()
+                      .substr(0, 10),
+                    endTime: new Date(licenseTokenInfo[3].toNumber())
+                      .toISOString()
+                      .substr(0, 10)
+                  });
                 });
-              });
             });
         });
       }

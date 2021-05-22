@@ -126,7 +126,12 @@
                     <div>Now Your license is on Market!</div>
                     <div>
                       Your picture on IPFS:
-                      <v-btn :href="tokenUri" target="black" small text>
+                      <v-btn
+                        :href="`http://ipfs.infura.io:5001/api/v0/cat?arg=${tokenUri}`"
+                        target="black"
+                        small
+                        text
+                      >
                         click me
                         <v-icon>mdi-image</v-icon>
                       </v-btn>
