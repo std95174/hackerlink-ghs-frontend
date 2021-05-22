@@ -16,12 +16,25 @@
         </v-slide-y-transition>
       </v-col>
     </v-row>
+
     <v-row align="center" justify="center" class="mb-3 mr-3 ml-3">
       <v-card width="75vw">
         <v-toolbar dark flat>
-          <v-toolbar-title>{{ tabItems[tab] }}</v-toolbar-title>
+          <v-toolbar-title>
+            {{ tabItems[tab] }}
+          </v-toolbar-title>
+          <v-badge
+            :value="hover"
+            color="deep-purple accent-4"
+            content="The picuture is a sample, buy license to see actual size picture"
+            right
+            transition="slide-y-transition"
+          >
+            <v-hover v-model="hover">
+              <v-icon>mdi-alert-circle</v-icon>
+            </v-hover>
+          </v-badge>
 
-          <v-spacer></v-spacer>
           <template v-slot:extension>
             <v-tabs v-model="tab" align-with-title>
               <v-tabs-slider color="white"></v-tabs-slider>
@@ -47,6 +60,7 @@
               "
               :loading="loading"
               dark
+              height="60vh"
             >
               <template v-slot:[`item.photo`]="{ item }">
                 <v-container>
@@ -148,7 +162,7 @@ export default {
       headers: [
         // { text: "Token ID", align: "center", value: "tokenId", width: "10%" },
         // { text: "Token URI", align: "center", value: "tokenUri" },
-        { text: "Photo", align: "center", value: "photo" },
+        { text: "Picture", align: "center", value: "photo" },
         { text: "Price", align: "center", value: "price" },
         { text: "Quantity", align: "center", value: "quantity" },
         { text: "Start", align: "center", value: "startTime" },
@@ -179,7 +193,9 @@ export default {
       licenseTokens: [],
       loading: false,
       tableLoading: false,
-      txLoading: false
+      txLoading: false,
+
+      hover: false
     };
   },
   methods: {
