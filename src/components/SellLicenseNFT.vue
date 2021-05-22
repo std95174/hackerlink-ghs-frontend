@@ -92,7 +92,8 @@
                         v-model="price"
                         :error-messages="priceErrors"
                         type="number"
-                        label="Price"
+                        step="0.000001"
+                        label="Price(ETH)"
                         required
                         @change="$v.price.$touch()"
                         @blur="$v.price.$touch()"
@@ -136,7 +137,7 @@
                     </div>
                     <div>
                       Price:
-                      <span>{{ price }}</span>
+                      <span>{{ price }} ETH</span>
                     </div>
                     <div>
                       Transaction on blockchain:
@@ -183,10 +184,9 @@
 <script>
 import { mapGetters } from "vuex";
 import { ethers } from "ethers";
-import licenseTokenJson from "../assets/contracts/LicenseToken.json";
-import pintureJson from "../assets/contracts/Pinture.json";
 import { validationMixin } from "vuelidate";
 import { required, minValue } from "vuelidate/lib/validators";
+import { pintureWithSigner, licenseTokenWithSigner } from "@/common/contract";
 export default {
   name: "SellLicenseNFT",
   props: {
@@ -233,7 +233,7 @@ export default {
   validations: {
     tokenId: { required },
     tokenUri: { required },
-    price: { required, minValue: minValue(1) },
+    price: { required, minValue: minValue(0.000001) },
     checkbox: {
       checked(val) {
         return val;
@@ -247,22 +247,6 @@ export default {
     },
     async getLicenseTokens() {
       this.licenseTokens.length = 0;
-      const ethersJsProvider = new ethers.providers.Web3Provider(
-        window.ethereum
-      );
-
-      const contractAddress = process.env.VUE_APP_LICENSE_CONTRACT_ADDRESS;
-      const abi = licenseTokenJson.abi;
-
-      // The Contract object
-      const licenseTokenContract = new ethers.Contract(
-        contractAddress,
-        abi,
-        ethersJsProvider
-      );
-      const licenseTokenWithSigner = licenseTokenContract.connect(
-        ethersJsProvider.getSigner()
-      );
       if (this.currentAccount == "") {
         alert("connect metamask first");
         return;
@@ -302,22 +286,6 @@ export default {
     async approveToPincture(tokenId, tokenUri) {
       this.tokenId = tokenId;
       this.tokenUri = tokenUri;
-      const ethersJsProvider = new ethers.providers.Web3Provider(
-        window.ethereum
-      );
-
-      const contractAddress = process.env.VUE_APP_LICENSE_CONTRACT_ADDRESS;
-      const abi = licenseTokenJson.abi;
-
-      // The Contract object
-      const licenseTokenContract = new ethers.Contract(
-        contractAddress,
-        abi,
-        ethersJsProvider
-      );
-      const licenseTokenWithSigner = licenseTokenContract.connect(
-        ethersJsProvider.getSigner()
-      );
       if (this.currentAccount == "") {
         alert("connect metamask first");
         return;
@@ -325,7 +293,6 @@ export default {
 
       try {
         this.loading = true;
-        console.log(licenseTokenWithSigner);
         const tx = await licenseTokenWithSigner.approve(
           process.env.VUE_APP_PINTURE_CONTRACT_ADDRESS,
           tokenId
@@ -354,22 +321,6 @@ export default {
       }
     },
     async setPrice() {
-      const ethersJsProvider = new ethers.providers.Web3Provider(
-        window.ethereum
-      );
-
-      const contractAddress = process.env.VUE_APP_PINTURE_CONTRACT_ADDRESS;
-      const abi = pintureJson.abi;
-
-      // The Contract object
-      const pintureContract = new ethers.Contract(
-        contractAddress,
-        abi,
-        ethersJsProvider
-      );
-      const pintureWithSigner = pintureContract.connect(
-        ethersJsProvider.getSigner()
-      );
       if (this.currentAccount == "") {
         alert("connect metamask first");
         return;
@@ -377,7 +328,10 @@ export default {
 
       try {
         this.loading = true;
-        const tx = await pintureWithSigner.setPrice(this.tokenId, this.price);
+        const tx = await pintureWithSigner.setPrice(
+          this.tokenId,
+          ethers.utils.parseEther(this.price).toString()
+        );
         this.txHash = tx.hash;
       } catch (error) {
         this.loading = false;
@@ -388,13 +342,13 @@ export default {
 
       try {
         const vm = this;
-        pintureContract.on(
+        pintureWithSigner.on(
           "SetPrice",
           (sender, licenseTokenId, price, event) => {
             vm.loading = false;
             console.log(event);
             this.licenseTokenId = licenseTokenId;
-            this.price = price;
+            this.price = ethers.utils.formatEther(price);
             vm.e1 = 3;
           }
         );
@@ -445,7 +399,7 @@ export default {
     priceErrors() {
       const errors = [];
       if (!this.$v.price.$dirty) return errors;
-      !this.$v.price.minValue && errors.push("Price must be > 0");
+      !this.$v.price.minValue && errors.push("Price must be > 0.000001)");
       !this.$v.price.required && errors.push("Price is required");
       return errors;
     }

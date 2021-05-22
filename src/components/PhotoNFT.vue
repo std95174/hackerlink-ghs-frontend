@@ -132,7 +132,7 @@
 <script>
 import { mapGetters } from "vuex";
 import { ethers } from "ethers";
-import pictureTokenJson from "../assets/contracts/PictureToken.json";
+import { pictureTokenWithSigner } from "@/common/contract";
 import axios from "axios";
 export default {
   name: "PhotoNFT",
@@ -174,22 +174,6 @@ export default {
         });
     },
     async mintPintureNFT() {
-      const ethersJsProvider = new ethers.providers.Web3Provider(
-        window.ethereum
-      );
-
-      const contractAddress = process.env.VUE_APP_PICTURE_CONTRACT_ADDRESS;
-      const abi = pictureTokenJson.abi;
-
-      // The Contract object
-      const pictureTokenContract = new ethers.Contract(
-        contractAddress,
-        abi,
-        ethersJsProvider
-      );
-      const pictureTokenWithSigner = pictureTokenContract.connect(
-        ethersJsProvider.getSigner()
-      );
       if (this.currentAccount == "") {
         alert("connect metamask first");
         return;

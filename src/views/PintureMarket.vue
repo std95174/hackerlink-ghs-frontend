@@ -59,8 +59,8 @@
   
 <script>
 import { ethers } from "ethers";
-import pintureJson from "../assets/contracts/Pinture.json";
-import licenseTokenJson from "../assets/contracts/LicenseToken.json";
+import { pintureWithSigner, licenseTokenWithSigner } from "@/common/contract";
+
 export default {
   name: "PintureMarket",
   data() {
@@ -89,30 +89,6 @@ export default {
   },
   async mounted() {
     this.loading = true;
-    const ethersJsProvider = new ethers.providers.Web3Provider(window.ethereum);
-
-    const contractAddress = process.env.VUE_APP_PINTURE_CONTRACT_ADDRESS;
-    const abi = pintureJson.abi;
-
-    // The Contract object
-    const pintureContract = new ethers.Contract(
-      contractAddress,
-      abi,
-      ethersJsProvider
-    );
-    const pintureWithSigner = pintureContract.connect(
-      ethersJsProvider.getSigner()
-    );
-
-    const licenseTokenContract = new ethers.Contract(
-      process.env.VUE_APP_LICENSE_CONTRACT_ADDRESS,
-      licenseTokenJson.abi,
-      ethersJsProvider
-    );
-    const licenseTokenWithSigner = licenseTokenContract.connect(
-      ethersJsProvider.getSigner()
-    );
-
     if (this.currentAccount == "") {
       alert("connect metamask first");
       return;

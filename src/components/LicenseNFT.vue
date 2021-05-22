@@ -69,6 +69,9 @@
                   <v-card-title> Config Your License </v-card-title>
                   <v-card-text>
                     <form>
+                      <a @click="to = currentAccount"
+                        >Click and Paste your address</a
+                      >
                       <v-text-field
                         v-model="to"
                         :error-messages="toErrors"
@@ -236,8 +239,10 @@
 <script>
 import { mapGetters } from "vuex";
 import { ethers } from "ethers";
-import pictureTokenJson from "../assets/contracts/PictureToken.json";
-import licenseTokenJson from "../assets/contracts/LicenseToken.json";
+import {
+  pictureTokenWithSigner,
+  licenseTokenWithSigner
+} from "@/common/contract";
 import { validationMixin } from "vuelidate";
 import {
   required,
@@ -313,22 +318,7 @@ export default {
     },
     async getPictureTokens() {
       this.pintureTokens.length = 0;
-      const ethersJsProvider = new ethers.providers.Web3Provider(
-        window.ethereum
-      );
 
-      const contractAddress = process.env.VUE_APP_PICTURE_CONTRACT_ADDRESS;
-      const abi = pictureTokenJson.abi;
-
-      // The Contract object
-      const pictureTokenContract = new ethers.Contract(
-        contractAddress,
-        abi,
-        ethersJsProvider
-      );
-      const pictureTokenWithSigner = pictureTokenContract.connect(
-        ethersJsProvider.getSigner()
-      );
       if (this.currentAccount == "") {
         alert("connect metamask first");
         return;
@@ -376,22 +366,6 @@ export default {
       }
     },
     async mintLicenseNFT() {
-      const ethersJsProvider = new ethers.providers.Web3Provider(
-        window.ethereum
-      );
-
-      const contractAddress = process.env.VUE_APP_LICENSE_CONTRACT_ADDRESS;
-      const abi = licenseTokenJson.abi;
-
-      // The Contract object
-      const licenseTokenContract = new ethers.Contract(
-        contractAddress,
-        abi,
-        ethersJsProvider
-      );
-      const licenseTokenWithSigner = licenseTokenContract.connect(
-        ethersJsProvider.getSigner()
-      );
       if (this.currentAccount == "") {
         alert("connect metamask first");
         return;
