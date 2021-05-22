@@ -17,14 +17,20 @@
       </v-col>
     </v-row>
     <v-row align="center" justify="center" class="mb-3">
-      <v-data-table :headers="headers" :items="pintures">
+      <v-data-table
+        :headers="headers"
+        :items="pintures"
+        no-data-text="trying to get licenses..."
+        :loading="loading"
+        dark
+      >
         <template v-slot:[`item.photo`]="{ item }">
           <v-container>
             <v-row align="center" justify="center" class="pa-3">
               <v-flex xs4>
                 <v-layout justify-center align-center>
                   <v-img
-                    width="250"
+                    width="350"
                     :src="`http://ipfs.infura.io:5001/api/v0/cat?arg=${item.photo}`"
                   >
                   </v-img>
@@ -33,8 +39,16 @@
             </v-row>
           </v-container>
         </template>
+
+        <template v-slot:[`item.price`]="{ item }">
+          {{ item.price }} ETH
+        </template>
         <template v-slot:[`item.actions`]="{}">
-          <v-btn color="primary" @click="alert('this feature is on the way!')">
+          <v-btn
+            color="primary"
+            @click="alert('this feature is on the way!')"
+            outlined
+          >
             Buy
           </v-btn>
         </template>
@@ -54,18 +68,18 @@ export default {
       show: false,
       headers: [
         // { text: "Token ID", align: "center", value: "tokenId", width: "10%" },
-        { text: "Token URI", align: "center", value: "tokenUri", width: "20%" },
-        { text: "Photo", align: "center", value: "photo", width: "40%" },
-        { text: "Price", align: "center", value: "price", width: "10%" },
+        // { text: "Token URI", align: "center", value: "tokenUri" },
+        { text: "Photo", align: "center", value: "photo" },
+        { text: "Price", align: "center", value: "price" },
         {
           text: "Actions",
           align: "center",
           value: "actions",
-          sortable: false,
-          width: "20%"
+          sortable: false
         }
       ],
-      pintures: []
+      pintures: [],
+      loading: false
     };
   },
   methods: {
@@ -74,6 +88,7 @@ export default {
     }
   },
   async mounted() {
+    this.loading = true;
     const ethersJsProvider = new ethers.providers.Web3Provider(window.ethereum);
 
     const contractAddress = process.env.VUE_APP_PINTURE_CONTRACT_ADDRESS;
@@ -110,13 +125,14 @@ export default {
         licenseTokenWithSigner.tokenURI(tokens[i]).then((tokenUri) => {
           const cid = tokenUri.split("ipfs://");
           vm.pintures.push({
-            price: price,
+            price: ethers.utils.formatEther(price),
             tokenUri: tokenUri,
             photo: cid[1]
           });
         });
       });
     }
+    this.loading = false;
   },
   created() {
     const vm = this;
