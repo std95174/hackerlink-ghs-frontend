@@ -186,12 +186,7 @@ import { ethers } from "ethers";
 import licenseTokenJson from "../assets/contracts/LicenseToken.json";
 import pintureJson from "../assets/contracts/Pinture.json";
 import { validationMixin } from "vuelidate";
-import {
-  required,
-  maxLength,
-  minLength,
-  minValue
-} from "vuelidate/lib/validators";
+import { required, minValue } from "vuelidate/lib/validators";
 export default {
   name: "SellLicenseNFT",
   props: {
@@ -223,15 +218,9 @@ export default {
       loading: false,
 
       // form
-      to: "",
       tokenId: "",
       tokenUri: "",
-      quantity: 0,
       checkbox: false,
-      startTime: "",
-      endTime: "",
-      startTimeMenu: false,
-      endTimeMenu: false,
 
       // result
       txHash: "",
