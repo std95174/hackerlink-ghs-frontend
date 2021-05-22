@@ -56,9 +56,7 @@
                       <template v-slot:[`item.actions`]="{ item }">
                         <v-btn
                           color="primary"
-                          @click="
-                            choosePictureToken(item.tokenId, item.tokenUri)
-                          "
+                          @click="choosePictureToken(item.tokenId)"
                         >
                           Continue
                         </v-btn>
@@ -92,10 +90,25 @@
                         disabled
                         required
                       ></v-text-field>
+                      <v-row>
+                        <v-col cols="8">
+                          <v-file-input @change="setPhoto"></v-file-input>
+                        </v-col>
+                        <v-col cols="4">
+                          <v-btn
+                            color="primary"
+                            @click="uploadToIPFS"
+                            :loading="uploadLoading"
+                          >
+                            Upload
+                          </v-btn>
+                        </v-col>
+                      </v-row>
+
                       <v-text-field
                         v-model="tokenUri"
                         :error-messages="tokenUriErrors"
-                        label="Picture Token URI"
+                        label="License Token URI"
                         disabled
                         required
                       ></v-text-field>
@@ -241,8 +254,8 @@
 </template>
 
 <script>
+import axios from "axios";
 import { mapGetters } from "vuex";
-import { ethers } from "ethers";
 import {
   pictureTokenWithSigner,
   licenseTokenWithSigner
@@ -283,6 +296,7 @@ export default {
       pintureTokens: [],
       tableLoading: false,
       loading: false,
+      uploadLoading: false,
 
       // form
       to: "",
@@ -294,6 +308,9 @@ export default {
       endTime: "",
       startTimeMenu: false,
       endTimeMenu: false,
+
+      // ipfs
+      photo: null,
 
       // result
       txHash: "",
@@ -353,10 +370,28 @@ export default {
           });
       }
     },
-    choosePictureToken(tokenId, tokenUri) {
+    choosePictureToken(tokenId) {
       this.tokenId = tokenId._hex;
-      this.tokenUri = tokenUri;
       this.e1 = 2;
+    },
+    setPhoto(event) {
+      this.photo = event;
+      console.log(this.photo);
+    },
+    uploadToIPFS() {
+      this.uploadLoading = true;
+      let formData = new FormData();
+      formData.append("Photo", this.photo);
+      const vm = this;
+      axios
+        .post("https://ipfs.infura.io:5001/api/v0/add", formData)
+        .then((res) => {
+          vm.uploadLoading = false;
+          vm.tokenUri = res.data.Hash;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
     submit() {
       console.log("submit!");
