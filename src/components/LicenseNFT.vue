@@ -25,10 +25,14 @@
                   <v-card-title>
                     <span class="mr-3">Choose a Pinture</span>
                     <v-btn @click="getPictureTokens"
-                      >Get your Pinture NFTs</v-btn
+                      >Get your Picture NFTs</v-btn
                     ></v-card-title
                   >
-                  <div>
+                  <v-card-text>
+                    <span
+                      >Get and Choose picture that you want to make
+                      licenses</span
+                    >
                     <v-data-table
                       :headers="headers"
                       :items="pintureTokens"
@@ -60,7 +64,7 @@
                         </v-btn>
                       </template>
                     </v-data-table>
-                  </div>
+                  </v-card-text>
                 </v-card>
               </v-stepper-content>
 

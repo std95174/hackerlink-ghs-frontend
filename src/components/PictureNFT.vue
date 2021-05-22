@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="dialog">
     <v-card>
-      <v-card-title class="headline">Make Your Photo NFT</v-card-title>
+      <v-card-title class="headline">Make Your Picture NFT</v-card-title>
       <v-card-text>
         <div>
           <v-stepper v-model="e1">
@@ -22,8 +22,12 @@
             <v-stepper-items>
               <v-stepper-content step="1">
                 <v-card class="mb-12" color=" lighten-1" height="200px">
-                  <v-card-title>Upload Your Photo to IPFS</v-card-title>
+                  <v-card-title>Upload Your Picture to IPFS</v-card-title>
                   <v-card-text>
+                    <span
+                      >You can upload the sample picture here, and upload real
+                      picture to make License later.</span
+                    >
                     <v-file-input @change="setPhoto"></v-file-input>
                   </v-card-text>
                 </v-card>
@@ -135,7 +139,7 @@ import { ethers } from "ethers";
 import { pictureTokenWithSigner } from "@/common/contract";
 import axios from "axios";
 export default {
-  name: "PhotoNFT",
+  name: "PictureNFT",
   props: {
     value: Boolean
   },

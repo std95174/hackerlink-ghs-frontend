@@ -18,7 +18,7 @@
     </v-row>
     <v-row align="center" justify="center">
       <v-col class="text-right">
-        <v-btn @click="photoNFTDialog = true">📷 Make Your Photo NFT </v-btn>
+        <v-btn @click="photoNFTDialog = true">📷 Make Your Picture NFT </v-btn>
       </v-col>
       <v-col class="text-center"
         ><v-btn @click="licenseNFTDialog = true"
@@ -53,7 +53,7 @@
         </span>
       </v-col>
     </v-row>
-    <photo-nft v-model="photoNFTDialog"></photo-nft>
+    <picture-nft v-model="photoNFTDialog"></picture-nft>
     <license-nft v-model="licenseNFTDialog"></license-nft>
     <sell-license-nft v-model="sellLicenseNFTDialog"></sell-license-nft>
   </v-parallax>
@@ -61,14 +61,14 @@
 
 <script>
 // @ is an alias to /src
-import PhotoNFT from "@/components/PhotoNFT.vue";
+import PictureNFT from "@/components/PictureNFT.vue";
 import LicenseNFT from "@/components/LicenseNFT.vue";
 import SellLicenseNFT from "@/components/SellLicenseNFT.vue";
 
 export default {
   name: "Home",
   components: {
-    "photo-nft": PhotoNFT,
+    "picture-nft": PictureNFT,
     "license-nft": LicenseNFT,
     "sell-license-nft": SellLicenseNFT
   },
