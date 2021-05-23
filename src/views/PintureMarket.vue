@@ -78,6 +78,22 @@
                 </v-container>
               </template>
 
+              <template v-slot:[`item.licensePicture`]="{ item }">
+                <v-container>
+                  <v-row align="center" justify="center" class="pa-3">
+                    <v-flex xs4>
+                      <v-layout justify-center align-center>
+                        <v-img
+                          width="350"
+                          :src="`http://ipfs.infura.io:5001/api/v0/cat?arg=${item.licenseTokenUri}`"
+                        >
+                        </v-img>
+                      </v-layout>
+                    </v-flex>
+                  </v-row>
+                </v-container>
+              </template>
+
               <template v-slot:[`item.price`]="{ item }">
                 {{ item.price }} ETH
               </template>
@@ -163,6 +179,7 @@ export default {
         // { text: "Token ID", align: "center", value: "tokenId", width: "10%" },
         // { text: "Token URI", align: "center", value: "tokenUri" },
         { text: "Picture", align: "center", value: "photo" },
+        { text: "License", align: "center", value: "licensePicture" },
         { text: "Price", align: "center", value: "price" },
         { text: "Quantity", align: "center", value: "quantity" },
         { text: "Start", align: "center", value: "startTime" },
@@ -179,7 +196,7 @@ export default {
       licenseHeaders: [
         // { text: "Token ID", align: "center", value: "tokenId", width: "10%" },
         // { text: "Token URI", align: "center", value: "tokenUri" },
-        { text: "Photo", align: "center", value: "photo" },
+        { text: "License", align: "center", value: "photo" },
         { text: "Quantity", align: "center", value: "quantity" },
         { text: "Start", align: "center", value: "startTime" },
         { text: "End", align: "center", value: "endTime" },
@@ -242,24 +259,27 @@ export default {
           licenseTokenWithSigner
             .getLicenseTokenInfo(tokens[i])
             .then((licenseTokenInfo) => {
-              pictureTokenWithSigner
-                .tokenURI(licenseTokenInfo[0])
-                .then((pictureTokenUri) => {
-                  const cid = pictureTokenUri.split("ipfs://");
-                  vm.pintures.push({
-                    tokenId: licenseTokenInfo[0], // picture
-                    price: ethers.utils.formatEther(price),
-                    tokenUri: pictureTokenUri,
-                    photo: cid[1],
-                    quantity: licenseTokenInfo[1],
-                    startTime: new Date(licenseTokenInfo[2].toNumber())
-                      .toISOString()
-                      .substr(0, 10),
-                    endTime: new Date(licenseTokenInfo[3].toNumber())
-                      .toISOString()
-                      .substr(0, 10)
-                  });
+              Promise.all([
+                pictureTokenWithSigner.tokenURI(licenseTokenInfo[0]),
+                licenseTokenWithSigner.tokenURI(tokens[i])
+              ]).then((response) => {
+                const pictureCid = response[0].split("ipfs://");
+                const licenseCid = response[1].split("ipfs://");
+                vm.pintures.push({
+                  tokenId: licenseTokenInfo[0], // picture
+                  price: ethers.utils.formatEther(price),
+                  tokenUri: response[0],
+                  photo: pictureCid[1], // picture
+                  licenseTokenUri: licenseCid[1],
+                  quantity: licenseTokenInfo[1],
+                  startTime: new Date(licenseTokenInfo[2].toNumber())
+                    .toISOString()
+                    .substr(0, 10),
+                  endTime: new Date(licenseTokenInfo[3].toNumber())
+                    .toISOString()
+                    .substr(0, 10)
                 });
+              });
             });
         });
       }
