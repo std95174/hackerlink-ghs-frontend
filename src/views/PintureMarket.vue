@@ -121,6 +121,7 @@
                   ? 'Trying to get licenses...'
                   : 'You don\'t have any license yet, take a photo a make your own NFT!'
               "
+              height="60vh"
               dark
             >
               <template v-slot:[`item.photo`]="{ item }">
@@ -224,7 +225,7 @@ export default {
       }
       try {
         this.txLoading = true;
-        pintureWithSigner.buy(tokenId, {
+        pintureWithSigner.buy(tokenId._hex, {
           value: ethers.utils.parseEther(price)
         });
       } catch (error) {
@@ -242,7 +243,7 @@ export default {
           this.getPintures();
           this.getLicenseTokens();
           alert(
-            `Congratulations!! You've bount a License, ID: ${licenseTokenId}`
+            `Congratulations!! You've bought a License, ID: ${licenseTokenId}`
           );
         });
       } catch (error) {
@@ -266,7 +267,7 @@ export default {
                 const pictureCid = response[0].split("ipfs://");
                 const licenseCid = response[1].split("ipfs://");
                 vm.pintures.push({
-                  tokenId: licenseTokenInfo[0], // picture
+                  tokenId: tokens[i], // license
                   price: ethers.utils.formatEther(price),
                   tokenUri: response[0],
                   photo: pictureCid[1], // picture
